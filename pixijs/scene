@@ -1,0 +1,92 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Pixi js</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.3/pixi.min.js"></script>  
+    <style>* {padding: 0; margin: 0}</style>  
+</head>
+<body>
+    <script>
+        let type = "WebGL"
+        if(!PIXI.utils.isWebGLSupported()){
+            type = "canvas"
+        }
+        PIXI.utils.sayHello(type)
+        let app = new PIXI.Application({
+            width: 5900, 
+            height: 2850,
+            antialias: true,
+            transparent: false,
+            resolution: 1
+        });
+        document.body.appendChild(app.view);
+        app.renderer.backgroundColor = 0x061639;
+
+        PIXI.loader
+            .add("專業角色選擇圖.png")
+            .add("專業主頁面圖.png")
+            .add("專業開始圖.png")
+            .load(setup);
+
+        function setup() {
+            let sprite = new PIXI.Sprite(
+                PIXI.loader.resources["專業角色選擇圖.png"].texture
+            );
+            let sprite2 = new PIXI.Sprite(
+                PIXI.loader.resources["專業主頁面圖.png"].texture
+            );
+            let sprite3 = new PIXI.Sprite(
+                PIXI.loader.resources["專業開始圖.png"].texture
+            );
+        
+
+            sprite.width = 5900;
+            sprite.height = 2850;
+            sprite2.width = 5900;
+            sprite2.height = 2850;
+            sprite3.width = 5900;
+            sprite3.height = 2850;
+
+            app.stage.addChild(sprite);s
+            app.stage.addChild(sprite2);
+            app.stage.addChild(sprite3);
+           
+            window.addEventListener("click", ()=>{
+                sprite3.visible = false;
+                sprite2.visible = true;
+            window.addEventListener("click", ()=>{
+                sprite2.visible = false;
+                sprite.visible = true;
+
+            });
+            
+              
+           
+            });
+
+            
+
+            
+
+
+           
+
+          
+
+
+            
+        }
+
+            
+              
+
+
+
+    </script>
+</body>
+
+</html>
