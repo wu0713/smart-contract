@@ -1,0 +1,18 @@
+// contracts/GameItem.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.7;  //版本
+
+contract GameItem {
+uint256 public remaining;
+    mapping(uint256 => uint256) public cache;
+    function drawIndex() internal returns (uint256 index) {
+        //RNG
+        uint256 i = uint(blockhash(block.number - 1)) % remaining;
+        // if there's a cache at cache[i] then use it
+        // otherwise use i itself
+        index = cache[i] == 0 ? i : cache[i];
+        // grab a number from the tail
+        cache[i] = cache[remaining - 1] == 0 ? remaining - 1 : cache[remaining - 1];
+        remaining = remaining - 1;
+    }
+}
