@@ -1,18 +1,51 @@
-// contracts/GameItem.sol
+// 定義合約的授權標識
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;  //版本
 
-contract GameItem {
-uint256 public remaining;
-    mapping(uint256 => uint256) public cache;
-    function drawIndex() internal returns (uint256 index) {
-        //RNG
-        uint256 i = uint(blockhash(block.number - 1)) % remaining;
-        // if there's a cache at cache[i] then use it
-        // otherwise use i itself
-        index = cache[i] == 0 ? i : cache[i];
-        // grab a number from the tail
-        cache[i] = cache[remaining - 1] == 0 ? remaining - 1 : cache[remaining - 1];
-        remaining = remaining - 1;
+// 指定Solidity版本
+pragma solidity ^0.8.18;
+
+// 定義LootBoxes合約
+contract LootBoxes {
+    // 預定義的3種物品
+    string[3] public items = ["Dragon Sword", "Silver Sword", "Common Sword"];
+    // 每種物品被抽中的概率
+    uint[3] public odds = [10, 20, 70];
+    // 用於跟踪玩家在最後一個區塊購買的記錄，確保每個區塊只能購買一次
+    mapping(string => uint) lastBlock;
+
+    // 當玩家抽中一個物品時發出的事件
+    event Draws(string item, string player);
+
+    // 玩家調用此函數來抽取物品
+    //玩家的名稱、暱稱、地址或其他任何唯一標識符。在某些情況下，它可能會是玩家的以太坊地址，但這完全取決於如何使用此合約。
+    function drawItem(string memory playerIdentifier) public returns(string memory) {
+        // 確保玩家在當前區塊還沒有購買過
+        require(block.number != lastBlock[playerIdentifier], "One loot box per block allowed.");
+        // 更新玩家在此區塊的購買記錄
+        lastBlock[playerIdentifier] = block.number;
+        
+        // 獲得一個0到99之間的隨機數
+        uint randomValue = RNG(playerIdentifier);
+        uint lowerBoundary = 0;
+
+        // 循環遍歷每一個物品
+        for (uint i = 0; i < items.length; i++) {
+            // 檢查隨機值是否在當前物品的概率範圍內
+            if (randomValue >= lowerBoundary && randomValue < lowerBoundary + odds[i]) {
+                // 如果是，發出一個事件並返回該物品
+                emit Draws(items[i], playerIdentifier);
+                return items[i];
+            }
+            // 更新概率的下限，進入下一個物品的概率範圍
+            lowerBoundary = lowerBoundary + odds[i];
+        }
+        // 如果沒有物品被抽中，則還原交易（在當前設定中，這應該是不可能的）
+        revert("No item drawn.");
+    }
+
+    // 內部函數，返回0到99之間的隨機數
+    function RNG(string memory playerIdentifier) private view returns (uint8) {
+        // 使用區塊時間戳和玩家標識符生成隨機值
+        return uint8(uint256(keccak256(abi.encodePacked(block.timestamp, playerIdentifier))) % 100);
     }
 }
